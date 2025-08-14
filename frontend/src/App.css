@@ -1,178 +1,343 @@
-:root {
+/* ===================================================================
+   app.css (versão reorganizada)
+   Mantido compatível com notifications.js
+   Comentários em PT-BR
+   =================================================================== */
+
+/* ----------------------
+   Variáveis de cores
+   ---------------------- */
+:root{
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --light-color: #ecf0f1;
+  --dark-color: #2c3e50;
+  --success-color: #27ae60;
+  --danger-color: #e74c3c;
   --bs-primary: #0d6efd;
   --bs-success: #198754;
   --bs-danger: #dc3545;
 }
 
-body {
-  background-color: #f8fafc;
+/* ----------------------
+   Reset / Layout base
+   ---------------------- */
+* { box-sizing: border-box; }
+body{
+  margin:0;
+  padding:0;
+  background:#f8f9fa;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color:#222;
 }
+.app-container{ display:flex; flex-direction:column; min-height:100vh; }
 
-.card {
-  border-radius: 0.75rem;
-  overflow: hidden;
-}
-
-.preview-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.preview-item {
-  border: 1px solid #dee2e6;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  background: white;
-}
-
-.preview-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
-}
-
-.preview-image {
-  height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f1f5f9;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.preview-image img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.preview-details {
-  padding: 0.75rem;
-}
-
-.filename {
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.list-group-item {
-  border-radius: 0.5rem !important;
-  margin-bottom: 0.5rem;
-}
-
-/* Animação para notificações */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.list-group-item {
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* Progress Bar */
-.progress-bar-container {
-  width: 100%;
-  height: 24px;
-  background-color: #f0f0f0;
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 15px 0;
+/* ----------------------
+   Header (corrigido para evitar layout shift ao trocar logo)
+   - A imagem do logo deve receber a classe `.active` para ficar visível.
+   - Mantenha apenas uma das imagens com `.active` (ou controle via React).
+   ---------------------- */
+.app-header{
+  background:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  padding:1rem 0;              /* padding menor e mais estável */
+  margin-bottom:2rem;
+  /* mantém o header visualmente estável */
   position: relative;
+  z-index: 120;
 }
 
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-  transition: width 0.3s ease;
-  border-radius: 12px;
+/* wrapper com largura máxima.
+   usamos space-between para evitar que mudanças no conteúdo central empurrem a logo */
+.header-content{
+  max-width:1200px;
+  width:100%;
+  margin:0 auto;
+  padding:0 15px;
+  display:flex;
+  gap:1.5rem;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:nowrap; /* evita wrap que poderia reordenar logo/texto */
 }
 
-.progress-bar-text {
+/* container do logo com dimensões fixas — evita reflow quando troca a src */
+.logo-container{
+  width:140px;     /* largura fixa */
+  height:80px;     /* altura fixa */
+  flex: 2 auto;  /* não cresce / não encolhe */
+  position: relative; /* para posicionar logos absolutas dentro */
+  display: flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+}
+
+/* Cada imagem de logo deve ocupar o container mas ficar posicionada absolute:
+   isso permite trocar opacidade/visibilidade sem mudar layout.
+   O componente React deve aplicar .active somente na logo desejada. */
+.company-logo{
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #333;
-  font-size: 12px;
-  font-weight: bold;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;                   /* escondida por padrão */
+  transition: opacity .25s ease, transform .25s ease;
+  display: block;
+  pointer-events: none;         /* evita interação direta com a imagem */
 }
 
-/* Upload Status */
-.upload-status {
-  display: flex;
-  align-items: center;
-  color: #555;
-}
-
-/* Notifications */
-.notifications-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.notification {
-  position: relative;
-  padding: 15px 20px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  animation: slideIn 0.3s ease-out;
-  color: white;
-  min-width: 280px;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.notification.success {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.notification.error {
-  background: linear-gradient(135deg, #f85032 0%, #e73827 100%);
-}
-
-.notification.warning {
-  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-}
-
-.notification.info {
-  background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%);
-}
-
-.notification-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-grow: 1;
-}
-
-.notification-content svg {
-  font-size: 20px;
-}
-
-.notification-close {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 18px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.notification-close:hover {
+/* apenas a logo ativa fica visível */
+.company-logo.active{
   opacity: 1;
+  pointer-events: auto;
 }
+
+/* elemento à direita do header (placeholder) para balancear layout.
+   Se não precisar, pode remover; mantém espaço caso queira algo à direita. */
+.header-right {
+  width: 140px; /* mesma largura que logo-container para balancear */
+  flex: 0 0 auto;
+}
+
+/* texto central do header */
+.header-text {
+  flex: 1 1 auto;
+  text-align: center;
+  padding: 0 12px;
+}
+.app-title{
+  color:var(--primary-color);
+  font-weight:700;
+  font-size:1.6rem;
+  margin:0;
+  line-height:1.05;
+}
+.app-subtitle{ color:#7f8c8d; font-size:0.95rem; margin:0; }
+
+/* ----------------------
+   Card principal / Main
+   ---------------------- */
+.app-main{ flex:1; }
+.upload-card{
+  max-width:1200px;
+  margin:0 auto 2rem;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  background:white;
+}
+.card-header{
+  background:var(--primary-color);
+  color:#fff;
+  padding:1.25rem 1.5rem;
+}
+.card-header h2{ margin:0; display:flex; align-items:center; font-size:1.25rem; }
+.card-body{ padding:2rem; background:#fff; }
+
+/* ----------------------
+   Footer
+   ---------------------- */
+.app-footer{ margin-top:auto; padding:1.5rem 0; background:var(--dark-color); color:#fff; text-align:center; }
+.footer-text{ margin:0; font-size:1rem; }
+.version{ background: rgba(255,255,255,.08); padding:.2rem .5rem; border-radius:3px; margin-left:1rem; font-size:.8rem; }
+
+/* ======================
+   PREVIEW (arquivos)
+   ====================== */
+.preview-container{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+  gap:1rem;
+  margin-top:1.5rem;
+}
+
+.preview-item{
+  background:#fff;
+  border:1px solid #dee2e6;
+  border-radius:.5rem;
+  overflow:hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+  box-shadow:0 2px 5px rgba(0,0,0,0.05);
+}
+.preview-item:hover{ transform: translateY(-3px); box-shadow:0 .5rem 1rem rgba(0,0,0,0.1); }
+
+.preview-image{
+  height:140px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f1f5f9;
+  border-bottom:1px solid #e2e8f0;
+}
+.preview-image img{ max-width:100%; max-height:100%; object-fit:contain; cursor:zoom-in; user-select:none; }
+
+.preview-details{ padding:.75rem; display:flex; flex-direction:column; gap:.5rem; }
+.filename{ font-size:.9rem; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
+.size.badge{ font-size:.75rem; padding:.25rem .5rem; }
+
+/* actions row: status icon + remove icon (corrige alinhamento) */
+.preview-actions{
+  display:flex;
+  align-items:center;        /* garante alinhamento vertical */
+  justify-content:space-between;
+  gap:8px;
+}
+
+/* status icon: mantém altura fixa para alinhar com botão da lixeira */
+.status-icon{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:1rem;
+  height:36px;               /* match with .btn-icon height */
+  line-height:1;
+}
+.status-icon.valid{ color:var(--bs-success); }
+.status-icon.invalid{ color:var(--bs-danger); }
+
+/* botão ícone (lixeira) - alinhado com status-icon */
+.btn-icon{
+  width:36px;
+  height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:8px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-size:1rem;            /* mesmo tamanho visual do status-icon */
+  color:inherit;
+}
+.btn-icon:disabled{ opacity:.6; cursor:not-allowed; }
+
+/* Preview item status borders (utilizados no componente) */
+.preview-item.border-success{ border-color:var(--bs-success); box-shadow: 0 0 0 3px rgba(25,135,84,0.06); }
+.preview-item.border-danger{ border-color:var(--bs-danger); box-shadow: 0 0 0 3px rgba(220,53,69,0.06); }
+
+/* ======================
+   LISTA DE RESULTADOS
+   ====================== */
+.list-group-item{ border-radius:.5rem !important; margin-bottom:.5rem; animation: fadeIn .28s ease-out; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+
+/* ======================
+   PROGRESS BAR (compatível)
+   ====================== */
+/* nova barra (visual do projeto) */
+.project-progress-wrap{ display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+.project-progress{
+  width:100%;
+  height:12px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow: inset 0 -2px 6px rgba(0,0,0,0.06);
+}
+.project-progress-fill{
+  height:100%;
+  width:0%;
+  transition: width 300ms ease;
+  background: linear-gradient(90deg, var(--bs-primary) 0%, #4facfe 100%);
+  box-shadow: 0 6px 18px rgba(79,172,254,0.14);
+}
+.project-progress-info{ display:flex; justify-content:space-between; align-items:center; font-size:.85rem; color:#444; }
+.project-progress-info small{ color:#6c757d; }
+
+/* compatibilidade: antiga classe .progress-bar-container aplica mesma aparência */
+.progress-bar-container{ height:24px; width:100%; position:relative; }
+.progress-bar-container .progress-bar-fill{ height:100%; border-radius:12px; background: linear-gradient(90deg,#4facfe 0%, #00f2fe 100%); transition:width .3s ease; }
+.progress-bar-container .progress-bar-text{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#333; }
+
+/* ======================
+   NOTIFICATIONS (usado por notifications.js)
+   ====================== */
+.notifications-container{ position:fixed; bottom:20px; right:20px; z-index:1000; display:flex; flex-direction:column; gap:10px; }
+.notification{
+  position:relative;
+  padding:15px 20px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  color:white;
+  min-width:280px;
+}
+.notification.success{ background: linear-gradient(135deg,#4facfe 0%, #00f2fe 100%); }
+.notification.error{ background: linear-gradient(135deg,#f85032 0%, #e73827 100%); }
+.notification.warning{ background: linear-gradient(135deg,#f7971e 0%, #ffd200 100%); color:#212529; }
+.notification.info{ background: linear-gradient(135deg,#5b86e5 0%, #36d1dc 100%); }
+.notification-content{ display:flex; align-items:center; gap:10px; flex-grow:1; }
+.notification-content svg{ font-size:20px; }
+.notification-close{ background:none; border:0; color:inherit; cursor:pointer; font-size:18px; opacity:.85; transition:opacity .18s; }
+.notification-close:hover{ opacity:1; }
+
+/* ----------------------
+   Modal de visualização
+   ---------------------- */
+.img-modal-backdrop{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
+.img-modal-backdrop::before{ content:''; position:absolute; inset:0; backdrop-filter: blur(6px); background: rgba(0,0,0,.45); }
+.img-modal{ position:relative; width:min(1100px,95vw); height:min(80vh,800px); display:flex; align-items:center; justify-content:center; padding:12px; z-index:2001; }
+.img-modal-inner{ position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; border-radius:8px; overflow:hidden; background: rgba(255,255,255,0.02); }
+.img-modal-img{ max-width:calc(100% - 40px); max-height:calc(100% - 40px); object-fit:contain; transition:opacity 180ms ease; user-select:none; }
+.img-modal-img.loading{ opacity:.04; pointer-events:none; }
+.modal-nav-btn{ position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.95); border:0; padding:10px; border-radius:10px; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,.12); }
+.modal-nav-left{ left:10px; } .modal-nav-right{ right:10px; }
+.modal-close{ position:absolute; top:10px; right:10px; background:rgba(255,255,255,.95); border:0; padding:8px; border-radius:8px; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,.12); }
+.modal-loader{ position:absolute; width:48px; height:48px; border-radius:50%; border:4px solid rgba(0,0,0,.08); border-top-color:rgba(0,0,0,.4); animation:spin 1s linear infinite; z-index:2010; left:50%; top:50%; transform:translate(-50%,-50%); }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* ----------------------
+   Botões principais / controles superiores
+   ---------------------- */
+.top-row{ display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+.col-empresa{ min-width:180px; }
+.col-files{ flex:1; min-width:260px; }
+.col-actions{ min-width:160px; display:flex; align-items:flex-end; justify-content:flex-end; }
+
+/* linha descricao + excluir */
+.second-line{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:12px; }
+.desc-text{ color:#6c757d; font-size:.95rem; }
+.btn-excluir-wrap{ display:flex; align-items:center; }
+
+/* Botões iguais (Enviar / Excluir tudo) */
+.btn-action-large{
+  font-size:1rem;
+  padding:10px 16px;
+  min-width:150px;
+  height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+}
+
+/* ----------------------
+   Responsividade
+   ---------------------- */
+@media (max-width:768px){
+  .header-content{ flex-direction:column; gap:1rem; align-items:center; justify-content:center; }
+  .logo-container{ width:100px; height:60px; }
+  .card-body{ padding:1.5rem; }
+  .app-title{ font-size:1.7rem; }
+  .preview-container{ grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); }
+}
+@media (max-width:576px){
+  .card-body{ padding:1rem; }
+  .preview-container{ grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap:.8rem; }
+  .preview-image{ height:120px; }
+  .app-title{ font-size:1.5rem; }
+  .app-subtitle{ font-size:1rem; }
+  .col-empresa{ min-width:140px; }
+  .col-files{ min-width:160px; }
+  .img-modal{ width:95vw; height:75vh; }
+  .btn-action-large{ min-width:120px; height:40px; padding:8px 12px; font-size:.95rem; }
+}
+
+/* ícones do bootstrap (se ainda usar) */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css");
