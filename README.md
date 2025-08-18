@@ -6,8 +6,6 @@
 
 Aplicação full-stack para gerenciamento de upload de imagens para servidor FTP com validação inteligente e interface amigável.
 
-![Screenshot da Aplicação](screenshot.png) *(adicione seu screenshot depois)*
-
 ## ✨ Funcionalidades Principais
 
 - **🖼️ Upload Multiarquivo**  
